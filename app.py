@@ -1,8 +1,9 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify, Response
 from cloudant.client import Cloudant
 from os import environ
 from sys import exit
 import data
+import bcrypt as bc
 
 
 app = Flask(__name__)
@@ -25,6 +26,9 @@ except Exception as e:
 
 
 '''
+desnivel - falta de acessibilidade
+mato na calçada
+poste na calçada
 @app.route('/<nome>/<float:idade>')
 def hello(nome, idade):
     return f"Ta achando que eu sou besta?? {nome} {idade}"
@@ -41,33 +45,45 @@ def outro(nome, idade):
 '''
 
 
-@app.route('/v1/buraco_rua', methods=["GET", "PUT", "DELETE"])
+@app.route('/v1/buraco', methods=["GET", "POST", "DELETE"])
 def buraco():
     if request.method == 'GET':
         return "test"
+
     elif request.method in ("PUT", "POST"):
-        return "test"
+        try:
+            lat = float(request.args["lat"])
+            longt = float(request.args["longt"])
+            date = int(request.args["date"])
+            tipo = data.Tipo(int(request.args["tipo"]))
+            ocorrencia = data.Ocorrencia(lat, longt, date, tipo)
+            return jsonify(banana=lat)
+        except Exception as e:
+            if isinstance(e, KeyError):
+                return jsonify(code=400, error="Argumentos faltando")
+            if isinstance(e, ValueError):
+                return jsonify(code=400, error="Argumentos inválidos")
+            return jsonify(code=400, error="Erro desconhecido")
+
     elif request.method == 'DELETE':
-        pass
+        return "buraco"
 
 
-@app.route('/v1/buraco_rua/deletar')
-def deletar_buraco():
-    stub = data.Ocorrencia(112.21321, 213.2313, 32131231,
-                           data.Tipo.BURACO.value)
-    print(stub.__dict__)
-    docs = ocorrencia.create_document(
-        {"lat": 2131.2311, "long": 2313.2222, "date": 321321321321, "tipo": 1})
-    print("LOL")
-    print(docs.exists())
-    return "Buraco criado"
+@app.route('/v1/usuario', methods=["GET", "POST", "DELETE"])
+def user():
+    if request.method == 'GET':
+        return "test"
+    elif request.method == 'POST':
+        nome_usuario = request.args["nome_usuario"]
+        nome = request.args["nome"]
+        senha = request.args["senha"]
+        salt = bc.gensalt()
 
-
-@app.route('/v1/calcada_quebrada/criar')
-def criar_calcada():
-    return "Calcada quebrada adicionada"
-
-
-@app.route('/v1/calcada_quebrada/deletar')
-def deletar_calcada():
-    return "Calcada quebrada removida"
+        user = data.Usuario(
+            nome_usuario, nome, bc.hashpw(senha.encode(), salt).decode(),
+            salt.decode())
+        print(user.__dict__)
+        usuario.create_document(
+            user.__dict__
+        )
+        return jsonify(code=200)
