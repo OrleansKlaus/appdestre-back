@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import IntEnum
 
 
 class Ocorrencia:
@@ -9,7 +9,7 @@ class Ocorrencia:
         self.tipo: Tipo = tipo
 
 
-class Tipo(Enum):
+class Tipo(IntEnum):
     BURACO = 1
     ENTULHO = 2
     FAIXA_PEDESTRE = 3
