@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, make_response
 from cloudant.client import Cloudant
 from os import environ
 from sys import exit
@@ -45,10 +45,14 @@ def outro(nome, idade):
 '''
 
 
+def aceitar_host_externo(resp):
+    return make_response(resp, {"Access-Control-Allow-Origin": "*"})
+
+
 @app.route('/v1/ocorrencia', methods=["GET", "POST", "DELETE"])
 def ocorrencias():
     if request.method == 'GET':
-        return jsonify(code=200, data=list(db_ocorrencias))
+        return aceitar_host_externo(jsonify(code=200, data=list(db_ocorrencias)))
 
     elif request.method in ("PUT", "POST"):
         try:
@@ -60,13 +64,13 @@ def ocorrencias():
             like = int(request.args["like"])
             ocorrencia = data.Ocorrencia(
                 lat, longt, date, tipo, descricao, like)
-            return jsonify(code=200)
+            return aceitar_host_externo(jsonify(code=200))
         except Exception as e:
             if isinstance(e, KeyError):
-                return jsonify(code=400, error="Argumentos faltando")
+                return aceitar_host_externo(jsonify(code=400, error="Argumentos faltando"))
             if isinstance(e, ValueError):
-                return jsonify(code=400, error="Argumentos inválidos")
-            return jsonify(code=400, error="Erro desconhecido")
+                return aceitar_host_externo(jsonify(code=400, error="Argumentos inválidos"))
+            return aceitar_host_externo(jsonify(code=400, error="Erro desconhecido"))
 
     elif request.method == 'DELETE':
         return "buraco"
@@ -75,7 +79,7 @@ def ocorrencias():
 @app.route('/v1/usuario', methods=["GET", "POST", "DELETE"])
 def user():
     if request.method == 'GET':
-        return "test"
+        return aceitar_host_externo(jsonify(code=200, data=list(usuario)))
     elif request.method == 'POST':
         nome_usuario = request.args["nome_usuario"]
         nome = request.args["nome"]
@@ -89,4 +93,4 @@ def user():
         usuario.create_document(
             user.__dict__
         )
-        return jsonify(code=200)
+        return aceitar_host_externo(jsonify(code=200))
