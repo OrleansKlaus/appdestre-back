@@ -10,11 +10,13 @@ class Tipo(IntEnum):
 
 
 class Ocorrencia:
-    def __init__(self, lat: float, longt: float, date: int, tipo: Tipo):
+    def __init__(self, lat: float, longt: float, date: int, tipo: Tipo,
+                 descricao: str, like: int):
         self.lat: float = lat
         self.longt: float = longt
         self.date: int = date
         self.tipo: Tipo = tipo
+        self.descricao: str = descricao
 
 
 class Usuario:

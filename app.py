@@ -13,7 +13,7 @@ try:
     passwd = environ.get("CLOUDANT_PASSWORD")
     url = environ.get("CLOUDANT_URL")
     client = Cloudant(usuario, passwd, url=url, connect=True)
-    ocorrencia = client['ocorrencia']
+    db_ocorrencias = client['ocorrencia']
     usuario = client['usuario']
 except Exception as e:
     if isinstance(e, KeyError):
@@ -45,10 +45,10 @@ def outro(nome, idade):
 '''
 
 
-@app.route('/v1/buraco', methods=["GET", "POST", "DELETE"])
-def buraco():
+@app.route('/v1/ocorrencia', methods=["GET", "POST", "DELETE"])
+def ocorrencias():
     if request.method == 'GET':
-        return "test"
+        return jsonify(code=200, data=list(db_ocorrencias))
 
     elif request.method in ("PUT", "POST"):
         try:
@@ -56,8 +56,11 @@ def buraco():
             longt = float(request.args["longt"])
             date = int(request.args["date"])
             tipo = data.Tipo(int(request.args["tipo"]))
-            ocorrencia = data.Ocorrencia(lat, longt, date, tipo)
-            return jsonify(banana=lat)
+            descricao = request.args["descricao"]
+            like = int(request.args["like"])
+            ocorrencia = data.Ocorrencia(
+                lat, longt, date, tipo, descricao, like)
+            return jsonify(code=200)
         except Exception as e:
             if isinstance(e, KeyError):
                 return jsonify(code=400, error="Argumentos faltando")
